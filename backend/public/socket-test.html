@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Socket Test - Smart IV</title>
+</head>
+<body>
+  <h2>Smart IV Socket Test</h2>
+  <p>Open browser console to see live events.</p>
+
+  <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+  <script>
+    const socket = io("http://localhost:5000");
+
+    socket.on("connect", () => {
+      console.log("🟢 Connected to backend:", socket.id);
+    });
+
+    socket.on("reading:update", (data) => {
+      console.log("📡 reading:update", data);
+    });
+
+    socket.on("alert:new", (data) => {
+      console.log("🚨 alert:new", data);
+    });
+
+    socket.on("alert:resolved", (data) => {
+      console.log("✅ alert:resolved", data);
+    });
+
+    socket.on("device:online", (data) => {
+      console.log("🟢 device:online", data);
+    });
+
+    socket.on("device:offline", (data) => {
+      console.log("🔴 device:offline", data);
+    });
+
+    socket.on("disconnect", () => {
+      console.log("🔴 Disconnected from backend");
+    });
+  </script>
+</body>
+</html>

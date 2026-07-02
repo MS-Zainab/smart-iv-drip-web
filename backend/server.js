@@ -4,48 +4,74 @@ const express = require("express");
 const cors = require("cors");
 const http = require("http");
 const { Server } = require("socket.io");
-
 const connectDB = require("./config/db");
+
+// Routes
+const authRoutes = require("./routes/authRoutes");
+const patientRoutes = require("./routes/patientRoutes");
+const deviceRoutes = require("./routes/deviceRoutes");
+const readingRoutes = require("./routes/readingRoutes");
+const alertRoutes = require("./routes/alertRoutes");
+
+// Socket handler
+const { initializeSocket } = require("./sockets/socketHandler");
 
 const app = express();
 
+// ==========================
 // Connect MongoDB
+// ==========================
 connectDB();
 
+// ==========================
 // Middleware
+// ==========================
 app.use(cors());
 app.use(express.json());
+app.use(express.static("public"));
 
-// Basic Route
+// ==========================
+// API Routes
+// ==========================
+app.use("/api/auth", authRoutes);
+app.use("/api/patients", patientRoutes);
+app.use("/api/devices", deviceRoutes);
+app.use("/api/readings", readingRoutes);
+app.use("/api/alerts", alertRoutes);
+
+// ==========================
+// Health Route
+// ==========================
 app.get("/", (req, res) => {
-    res.json({
-        success: true,
-        message: "Smart IV Drip Backend Running..."
-    });
+  res.json({
+    success: true,
+    message: "Smart IV Drip Backend Running...",
+  });
 });
 
+// ==========================
 // Create HTTP Server
+// ==========================
 const server = http.createServer(app);
 
-// Socket.IO
+// ==========================
+// Socket.IO Setup
+// ==========================
 const io = new Server(server, {
-    cors: {
-        origin: process.env.CLIENT_URL,
-        methods: ["GET", "POST"]
-    }
+  cors: {
+    origin: process.env.CLIENT_URL || "*",
+    methods: ["GET", "POST"],
+  },
 });
 
-io.on("connection", (socket) => {
-    console.log("🟢 Client Connected:", socket.id);
+// Initialize socket connection handler
+initializeSocket(io);
 
-    socket.on("disconnect", () => {
-        console.log("🔴 Client Disconnected:", socket.id);
-    });
-});
-
+// ==========================
 // Start Server
+// ==========================
 const PORT = process.env.PORT || 5000;
 
 server.listen(PORT, () => {
-    console.log(`🚀 Server running on port ${PORT}`);
+  console.log(`🚀 Server running on port ${PORT}`);
 });
