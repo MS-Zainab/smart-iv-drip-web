@@ -16,6 +16,7 @@ const nurseRoutes = require("./routes/nurseRoutes");
 const wardRoutes = require("./routes/wardRoutes");
 const sessionRoutes = require("./routes/sessionRoutes");
 const dashboardRoutes = require("./routes/dashboardRoutes");
+const userRoutes = require("./routes/userRoutes");
 
 
 // Socket handler
@@ -47,7 +48,11 @@ app.use("/api/nurses", nurseRoutes);
 app.use("/api/wards", wardRoutes);
 app.use("/api/sessions", sessionRoutes);
 app.use("/api/dashboard", dashboardRoutes);
-
+app.use("/api/sessions", require("./routes/sessionRoutes"));
+app.use("/api/patients", require("./routes/patientRoutes"));
+app.use("/api/devices", require("./routes/deviceRoutes"));
+app.use("/api/nurses", require("./routes/nurseRoutes"));
+app.use("/api/users", userRoutes);
 
 // ==========================
 // Health Route

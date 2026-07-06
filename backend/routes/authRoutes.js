@@ -4,14 +4,15 @@ const router = express.Router();
 const {
   login,
   verifyToken,
+  resetAdminPassword,
 } = require("../controllers/authController");
 
 const { protect } = require("../middleware/authMiddleware");
 
-// Public Route
 router.post("/login", login);
-
-// Protected Route
 router.get("/verify", protect, verifyToken);
+
+// TEMP route for fixing admin password
+router.post("/reset-admin-password", resetAdminPassword);
 
 module.exports = router;

@@ -7,12 +7,13 @@ const generateToken = require("../utils/generateToken");
  * @route   POST /api/auth/login
  * @access  Public
  */
-
 const login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // Validate Input
+    console.log("========== LOGIN REQUEST ==========");
+    console.log("LOGIN BODY:", req.body);
+
     if (!email || !password) {
       return res.status(400).json({
         success: false,
@@ -20,10 +21,39 @@ const login = async (req, res) => {
       });
     }
 
-    // Find User
-    const user = await User.findOne({
-      email: email.toLowerCase(),
-    }).select("+password");
+    const normalizedEmail = email.toLowerCase().trim();
+
+    // Debug: show ALL users with this email
+    const matchedUsers = await User.find({ email: normalizedEmail }).select(
+      "+password fullName email role isActive"
+    );
+
+    console.log("MATCHED USERS COUNT:", matchedUsers.length);
+    console.log(
+      "MATCHED USERS:",
+      matchedUsers.map((u) => ({
+        id: u._id,
+        fullName: u.fullName,
+        email: u.email,
+        role: u.role,
+        isActive: u.isActive,
+      }))
+    );
+
+    const user = await User.findOne({ email: normalizedEmail }).select("+password");
+
+    console.log(
+      "FOUND USER:",
+      user
+        ? {
+            id: user._id,
+            fullName: user.fullName,
+            email: user.email,
+            role: user.role,
+            isActive: user.isActive,
+          }
+        : null
+    );
 
     if (!user) {
       return res.status(401).json({
@@ -32,16 +62,16 @@ const login = async (req, res) => {
       });
     }
 
-    // Check Active Status
-    if (!user.isActive) {
+    // Force true if field missing/undefined, but false should still block
+    if (user.isActive === false) {
       return res.status(403).json({
         success: false,
         message: "Your account has been deactivated.",
       });
     }
 
-    // Compare Password
     const isMatch = await bcrypt.compare(password, user.password);
+    console.log("PASSWORD MATCH:", isMatch);
 
     if (!isMatch) {
       return res.status(401).json({
@@ -50,20 +80,15 @@ const login = async (req, res) => {
       });
     }
 
-    // Update Last Login
     user.lastLogin = new Date();
     await user.save();
 
-    // Generate JWT
     const token = generateToken(user._id, user.role);
 
-    // Response
     return res.status(200).json({
       success: true,
       message: "Login successful.",
-
       token,
-
       user: {
         id: user._id,
         fullName: user.fullName,
@@ -74,10 +99,8 @@ const login = async (req, res) => {
         profileImage: user.profileImage,
       },
     });
-
   } catch (error) {
     console.error("Login Error:", error);
-
     return res.status(500).json({
       success: false,
       message: "Internal Server Error.",
@@ -90,7 +113,6 @@ const login = async (req, res) => {
  * @route   GET /api/auth/verify
  * @access  Private
  */
-
 const verifyToken = async (req, res) => {
   return res.status(200).json({
     success: true,
@@ -98,7 +120,50 @@ const verifyToken = async (req, res) => {
   });
 };
 
+/**
+ * @desc    TEMP Reset Admin Password + activate admin
+ * @route   POST /api/auth/reset-admin-password
+ * @access  Public (temporary)
+ */
+const resetAdminPassword = async (req, res) => {
+  try {
+    const admin = await User.findOne({
+      email: "admin@smartiv.com",
+    }).select("+password");
+
+    if (!admin) {
+      return res.status(404).json({
+        success: false,
+        message: "Admin user not found.",
+      });
+    }
+
+    const hashedPassword = await bcrypt.hash("Admin@123", 10);
+
+    admin.password = hashedPassword;
+    admin.isActive = true;
+    await admin.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Admin password reset successfully to Admin@123",
+      admin: {
+        id: admin._id,
+        email: admin.email,
+        isActive: admin.isActive,
+      },
+    });
+  } catch (error) {
+    console.error("Reset Admin Password Error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Server Error",
+    });
+  }
+};
+
 module.exports = {
   login,
   verifyToken,
+  resetAdminPassword,
 };

@@ -8,7 +8,7 @@ function DashboardLayout({ children }) {
       <Sidebar />
 
       {/* Right Content Area */}
-      <div className="ml-64 min-h-screen flex flex-col">
+      <div className="ml-72 min-h-screen flex flex-col">
         {/* Sticky Navbar */}
         <div className="sticky top-0 z-30">
           <Navbar />

@@ -2,23 +2,23 @@ const express = require("express");
 const router = express.Router();
 
 const {
-  createWard,
   getAllWards,
   getWardById,
+  createWard,
   updateWard,
-  deactivateWard,
+  deleteWard,
 } = require("../controllers/wardController");
 
 const { protect } = require("../middleware/authMiddleware");
 
-// Protect all ward routes
+// All ward routes protected
 router.use(protect);
 
-// Ward CRUD
-router.post("/", createWard);
+// IMPORTANT: only these routes
 router.get("/", getAllWards);
 router.get("/:id", getWardById);
+router.post("/", createWard);
 router.put("/:id", updateWard);
-router.put("/:id/deactivate", deactivateWard);
+router.delete("/:id", deleteWard);
 
 module.exports = router;
