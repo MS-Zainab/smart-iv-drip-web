@@ -16,22 +16,33 @@
 // };
 
 // export default SectionCard;
-
 const SectionCard = ({ title, children, actionText, onAction }) => {
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
-      <div className="flex items-center justify-between mb-5">
-        <h2 className="text-lg font-semibold text-slate-800">{title}</h2>
+    <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 sm:p-5">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-5">
+        <h2 className="text-lg font-semibold text-slate-800 break-words">
+          {title}
+        </h2>
 
-        {actionText ? (
+        {actionText && (
           <button
             type="button"
             onClick={onAction}
-            className="px-4 py-2 rounded-xl bg-slate-900 text-white text-sm font-medium hover:bg-slate-800 transition"
+            className="
+              w-full sm:w-auto
+              px-4 py-2
+              rounded-xl
+              bg-slate-900
+              text-white
+              text-sm
+              font-medium
+              hover:bg-slate-800
+              transition
+            "
           >
             {actionText}
           </button>
-        ) : null}
+        )}
       </div>
 
       {children}
